@@ -45,7 +45,7 @@ class JsTestSuite(TestSuite):
         """
         Returns all JS test suites
         """
-        return [JsTestSubSuite(test_id, **self.opts) for test_id in Env.JS_TEST_ID_KEYS]
+        return [JsTestSubSuite(test_id, **self.opts) for test_id in Env.JS_TEST_ID_KEYS if test_id != 'jest-snapshot']
 
 
 class JsTestSubSuite(TestSuite):
@@ -95,3 +95,18 @@ class JsTestSubSuite(TestSuite):
             ])
 
         return cmd
+
+
+class JestSnapshotTestSuite(TestSuite):
+    """
+    A class for running Jest Snapshot tests.
+    """
+    def __init__(self, *args, **kwargs):
+        super(JestSnapshotTestSuite, self).__init__(*args, **kwargs)
+
+    @property
+    def cmd(self):
+        """
+        Run the tests using Jest.
+        """
+        return ["jest"]
