@@ -1644,6 +1644,7 @@ class PublishSectionTest(CourseOutlineTest):
         self.courseware.go_to_sequential_position(2)
         self.assertEqual(1, self.courseware.num_xblock_components)
         self.course_home_page.visit()
+        self.course_home_page.wait_for_page()
         self.course_home_page.outline.go_to_section(SECTION_NAME, 'Test Subsection 2')
         self.assertEqual(1, self.courseware.num_xblock_components)
 

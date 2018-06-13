@@ -170,6 +170,7 @@ class CourseOutlinePage(PageObject):
 
         # Click the subsection's first problem and ensure that the page finishes
         # reloading
+        units[0].location_once_scrolled_into_view  # pylint: disable=W0104
         units[0].click()
 
         self._wait_for_course_section(section_title, subsection_title)
