@@ -101,9 +101,6 @@ class JestSnapshotTestSuite(TestSuite):
     """
     A class for running Jest Snapshot tests.
     """
-    def __init__(self, *args, **kwargs):
-        super(JestSnapshotTestSuite, self).__init__(*args, **kwargs)
-
     @property
     def cmd(self):
         """
