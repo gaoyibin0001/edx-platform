@@ -4,8 +4,10 @@ Tests for oauth_dispatch models.
 from django.test import TestCase
 
 from openedx.core.djangoapps.oauth_dispatch.tests.factories import ApplicationOrganizationFilterFactory
+from openedx.core.djangolib.testing.utils import skip_unless_lms
 
 
+@skip_unless_lms
 class ApplicationOrganizationFilterTestCase(TestCase):
     """
     Tests for the ApplicationOrganizationFilter model.
