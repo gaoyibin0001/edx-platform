@@ -12,6 +12,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.test import RequestFactory, TestCase, override_settings
 from oauth2_provider import models as dot_models
+from organizations.tests.factories import OrganizationFactory
 
 from provider import constants
 from student.tests.factories import UserFactory
@@ -283,6 +284,14 @@ class TestAuthorizationView(_DispatchingViewTestCase):
             redirect_uri=DUMMY_REDIRECT_URL,
             client_id='confidential-dot-app-client-id',
         )
+        models.ApplicationAccess.objects.create(
+            application=self.dot_app,
+            scopes=['grades:read'],
+        )
+        self.related_org = models.ApplicationOrganization.objects.create(
+            application=self.dot_app,
+            organization=OrganizationFactory()
+        )
         self.dop_app = self.dop_adapter.create_confidential_client(
             name='test dop client',
             user=self.user,
@@ -327,7 +336,7 @@ class TestAuthorizationView(_DispatchingViewTestCase):
                 'response_type': 'code',
                 'state': 'random_state_string',
                 'redirect_uri': DUMMY_REDIRECT_URL,
-                'scope': 'profile'
+                'scope': 'profile grades:read'
             },
             follow=True,
         )
@@ -335,6 +344,7 @@ class TestAuthorizationView(_DispatchingViewTestCase):
         # are the requested scopes on the page? We only requested 'profile', lets make
         # sure the page only lists that one
         self.assertContains(response, settings.OAUTH2_PROVIDER['SCOPES']['profile'])
+        self.assertContains(response, settings.OAUTH2_PROVIDER['SCOPES']['grades:read'])
         self.assertNotContains(response, settings.OAUTH2_PROVIDER['SCOPES']['read'])
         self.assertNotContains(response, settings.OAUTH2_PROVIDER['SCOPES']['write'])
         self.assertNotContains(response, settings.OAUTH2_PROVIDER['SCOPES']['email'])
@@ -353,6 +363,12 @@ class TestAuthorizationView(_DispatchingViewTestCase):
         self.assertContains(
             response,
             '<button type="submit" class="btn btn-authorization-allow" name="allow" value="Authorize"/>Allow</button>'
+        )
+
+        # Are the content provider organizations listed on the page?
+        self.assertContains(
+            response,
+            '<li>{org}</li>'.format(org=self.related_org.organization.name)
         )
 
     def _check_dot_response(self, response):

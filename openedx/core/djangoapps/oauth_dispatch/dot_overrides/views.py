@@ -45,7 +45,7 @@ class EdxOAuth2AuthorizationView(AuthorizationView):
 
             # at this point we know an Application instance with such client_id exists in the database
             application = get_application_model().objects.get(client_id=credentials['client_id'])
-            content_orgs = ApplicationOrganization.get_related_orgs(
+            content_orgs = ApplicationOrganization.get_related_org_names(
                 application,
                 relation_type=ApplicationOrganization.RELATION_TYPE_CONTENT_ORG
             )

@@ -109,13 +109,16 @@ class ApplicationOrganization(models.Model):
         unique_together = ('application', 'organization', 'relation_type')
 
     @classmethod
-    def get_related_orgs(cls, application, relation_type=None):
+    def get_related_org_names(cls, application, relation_type=None):
         """
-        Return the Organizations related to the given DOT Application.
+        Return the names of the Organizations related to the given DOT Application.
 
         Filter by relation_type if provided.
         """
-        return [r for r in application.organizations.all() if r is None or r.relation_type == relation_type]
+        return [
+            r.organization.name for r in application.organizations.all() \
+            if relation_type is None or r.relation_type == relation_type
+        ]
 
     def __unicode__(self):
         """
