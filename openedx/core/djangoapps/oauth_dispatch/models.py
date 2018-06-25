@@ -117,10 +117,10 @@ class ApplicationOrganization(models.Model):
         Return a unicode representation of this object.
         """
         return u"{application_name}:{organization}:{relation_type}".format(
-                application_name=self.application.name,
-                organization=self.organization.short_name,
-                relation_type=self.relation_type,
-            )
+            application_name=self.application.name,
+            organization=self.organization.short_name,
+            relation_type=self.relation_type,
+        )
 
     def to_jwt_filter_claim(self):
         """
