@@ -92,7 +92,7 @@ class DOTAdapter(object):
         Get the authorization filters for the given client application.
         """
         application = self.get_client(client_id=client_id)
-        filters = [unicode(org_relationship) for org_relationship in application.organizations.all()]
+        filters = [org_relation.to_jwt_filter_claim() for org_relation in application.organizations.all()]
         if application.authorization_grant_type == application.GRANT_CLIENT_CREDENTIALS:
             filters.append(self.FILTER_USER_ME)
         return filters

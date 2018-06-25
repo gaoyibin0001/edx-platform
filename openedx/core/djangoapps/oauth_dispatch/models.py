@@ -7,7 +7,6 @@ from datetime import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_mysql.models import ListCharField
-from oauth2_provider.models import AbstractApplication
 from oauth2_provider.settings import oauth2_settings
 from organizations.models import Organization
 from pytz import utc
@@ -84,9 +83,6 @@ class ApplicationAccess(models.Model):
             scopes=self.scopes,
         )
 
-    def get_related_orgs(self, relation_type=None):
-        return [r for r in self.organizations if r is None or r.relation_type == relation_type]
-
 
 class ApplicationOrganization(models.Model):
     """
@@ -111,6 +107,15 @@ class ApplicationOrganization(models.Model):
     class Meta:
         app_label = 'oauth_dispatch'
         unique_together = ('application', 'organization', 'relation_type')
+
+    @classmethod
+    def get_related_orgs(cls, application, relation_type=None):
+        """
+        Return the Organizations related to the given DOT Application.
+
+        Filter by relation_type if provided.
+        """
+        return [r for r in application.organizations.all() if r is None or r.relation_type == relation_type]
 
     def __unicode__(self):
         """
