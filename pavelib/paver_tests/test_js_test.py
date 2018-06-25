@@ -142,9 +142,4 @@ class TestPaverJavaScriptTestTasks(PaverTestCase):
 
             expected_messages.append(expected_test_tool_command)
 
-        print('task_messages')
-        print(self.task_messages)
-        print('expected_messages')
-        print(expected_messages)
-
         self.assertEquals(self.task_messages, expected_messages)
