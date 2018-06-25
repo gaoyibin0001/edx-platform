@@ -503,12 +503,12 @@ OAUTH_EXPIRE_PUBLIC_CLIENT_DAYS = 30
 ################################## DJANGO OAUTH TOOLKIT #######################################
 
 OAUTH2_DEFAULT_SCOPES = {
-    'read': 'Read access',
-    'write': 'Write access',
-    'email': 'Know your email address',
+    'read': _('Read access'),
+    'write': _('Write access'),
+    'email': _('Know your email address'),
     # conform profile scope message that is presented to end-user
     # to lms/templates/provider/authorize.html. This may be revised later.
-    'profile': 'Know your name and username',
+    'profile': _('Know your name and username'),
 }
 
 OAUTH2_PROVIDER = {
@@ -516,8 +516,8 @@ OAUTH2_PROVIDER = {
     'REFRESH_TOKEN_EXPIRE_SECONDS': 20160,
     'SCOPES_BACKEND_CLASS': 'openedx.core.djangoapps.oauth_dispatch.scopes.ApplicationModelScopes',
     'SCOPES': dict(OAUTH2_DEFAULT_SCOPES, **{
-        'grades:read': 'Retrieve your grades for your enrolled courses',
-        'certificates:read': 'Retrieve your course certificates'
+        'grades:read': _('Retrieve your grades for your enrolled courses'),
+        'certificates:read': _('Retrieve your course certificates'),
     }),
     'DEFAULT_SCOPES': OAUTH2_DEFAULT_SCOPES,
     'REQUEST_APPROVAL_PROMPT': 'auto_even_if_expired',
