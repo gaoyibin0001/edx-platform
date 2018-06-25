@@ -138,7 +138,7 @@ class TestPaverJavaScriptTestTasks(PaverTestCase):
                 if port:
                     expected_test_tool_command += u" --port={port}".format(port=port)
             else:
-                expected_test_tool_command += u'jest'
+                expected_test_tool_command = u'jest'
 
             expected_messages.append(expected_test_tool_command)
 
