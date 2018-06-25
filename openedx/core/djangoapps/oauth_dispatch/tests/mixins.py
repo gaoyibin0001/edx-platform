@@ -55,6 +55,7 @@ class AccessTokenMixin(object):
             'iss': issuer,
             'preferred_username': user.username,
             'scopes': scopes,
+            'version': settings.JWT_AUTH['JWT_SUPPORTED_VERSION'],
             'sub': anonymous_id_for_user(user, None),
         }
 

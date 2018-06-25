@@ -98,6 +98,15 @@ class _DispatchingViewTestCase(TestCase):
             client_id='dop-app-client-id',
         )
 
+        self.dot_app_access = models.ApplicationAccess.objects.create(
+            application=self.dot_app,
+            scopes=['grades:read'],
+        )
+        self.dot_app_org = models.ApplicationOrganization.objects.create(
+            application=self.dot_app,
+            organization=OrganizationFactory()
+        )
+
         # Create a "restricted" DOT Application which means any AccessToken/JWT
         # generated for this application will be immediately expired
         self.restricted_dot_app = self.dot_adapter.create_public_client(
@@ -108,14 +117,14 @@ class _DispatchingViewTestCase(TestCase):
         )
         models.RestrictedApplication.objects.create(application=self.restricted_dot_app)
 
-    def _post_request(self, user, client, token_type=None):
+    def _post_request(self, user, client, token_type=None, scopes=None):
         """
         Call the view with a POST request objectwith the appropriate format,
         returning the response object.
         """
-        return self.client.post(self.url, self._post_body(user, client, token_type))  # pylint: disable=no-member
+        return self.client.post(self.url, self._post_body(user, client, token_type, scopes))  # pylint: disable=no-member
 
-    def _post_body(self, user, client, token_type=None):
+    def _post_body(self, user, client, token_type=None, scope=None):
         """
         Return a dictionary to be used as the body of the POST request
         """
@@ -133,7 +142,7 @@ class TestAccessTokenView(AccessTokenLoginMixin, mixins.AccessTokenMixin, _Dispa
         self.url = reverse('access_token')
         self.view_class = views.AccessTokenView
 
-    def _post_body(self, user, client, token_type=None):
+    def _post_body(self, user, client, token_type=None, scope=None):
         """
         Return a dictionary to be used as the body of the POST request
         """
@@ -146,6 +155,9 @@ class TestAccessTokenView(AccessTokenLoginMixin, mixins.AccessTokenMixin, _Dispa
 
         if token_type:
             body['token_type'] = token_type
+
+        if scope:
+            body['scope'] = scope
 
         return body
 
@@ -239,6 +251,12 @@ class TestAccessTokenView(AccessTokenLoginMixin, mixins.AccessTokenMixin, _Dispa
         data = json.loads(response.content)
         self.assertNotIn('refresh_token', data)
 
+    def test_jwt_access_token_scopes(self):
+        scopes = self.dot_app_access.scopes
+        response = self._post_request(self.user, self.dot_app, token_type='jwt', scopes=scopes)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assert_valid_jwt_access_token(data['access_token'], self.user, scopes)
 
 @ddt.ddt
 @httpretty.activate
@@ -252,7 +270,7 @@ class TestAccessTokenExchangeView(ThirdPartyOAuthTestMixinGoogle, ThirdPartyOAut
         self.view_class = views.AccessTokenExchangeView
         super(TestAccessTokenExchangeView, self).setUp()
 
-    def _post_body(self, user, client, token_type=None):
+    def _post_body(self, user, client, token_type=None, scope=None):
         return {
             'client_id': client.client_id,
             'access_token': self.access_token,
@@ -288,7 +306,7 @@ class TestAuthorizationView(_DispatchingViewTestCase):
             application=self.dot_app,
             scopes=['grades:read'],
         )
-        self.related_org = models.ApplicationOrganization.objects.create(
+        self.dot_app_org = models.ApplicationOrganization.objects.create(
             application=self.dot_app,
             organization=OrganizationFactory()
         )
@@ -368,7 +386,7 @@ class TestAuthorizationView(_DispatchingViewTestCase):
         # Are the content provider organizations listed on the page?
         self.assertContains(
             response,
-            '<li>{org}</li>'.format(org=self.related_org.organization.name)
+            '<li>{org}</li>'.format(org=self.dot_app_org.organization.name)
         )
 
     def _check_dot_response(self, response):
