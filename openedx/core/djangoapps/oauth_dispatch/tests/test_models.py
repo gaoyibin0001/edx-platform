@@ -3,17 +3,17 @@ Tests for oauth_dispatch models.
 """
 from django.test import TestCase
 
-from openedx.core.djangoapps.oauth_dispatch.tests.factories import ApplicationOrganizationFilterFactory
+from openedx.core.djangoapps.oauth_dispatch.tests.factories import ApplicationOrganizationFactory
 from openedx.core.djangolib.testing.utils import skip_unless_lms
 
 
 @skip_unless_lms
-class ApplicationOrganizationFilterTestCase(TestCase):
+class ApplicationOrganizationTestCase(TestCase):
     """
-    Tests for the ApplicationOrganizationFilter model.
+    Tests for the ApplicationOrganization model.
     """
-    def test_unicode(self):
-        """ Verify __unicode__ returns the expected serialization of the model. """
-        org_filter = ApplicationOrganizationFilterFactory()
-        organization = org_filter.organization
-        assert unicode(org_filter) == unicode(':'.join([org_filter.provider_type, organization.short_name]))
+    def test_to_jwt_filter_claim(self):
+        """ Verify to_jwt_filter_claim returns the expected serialization of the model. """
+        org_relation = ApplicationOrganizationFactory()
+        organization = org_relation.organization
+        assert unicode(org_relation) == unicode(':'.join([org_relation.relation_type, organization.short_name]))

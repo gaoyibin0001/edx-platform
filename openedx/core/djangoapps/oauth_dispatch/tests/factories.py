@@ -10,7 +10,7 @@ import pytz
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from organizations.tests.factories import OrganizationFactory
 
-from openedx.core.djangoapps.oauth_dispatch.models import ApplicationAccess, ApplicationOrganizationFilter
+from openedx.core.djangoapps.oauth_dispatch.models import ApplicationAccess, ApplicationOrganization
 from student.tests.factories import UserFactory
 
 
@@ -33,13 +33,13 @@ class ApplicationAccessFactory(DjangoModelFactory):
     scopes = ['grades:read']
 
 
-class ApplicationOrganizationFilterFactory(DjangoModelFactory):
+class ApplicationOrganizationFactory(DjangoModelFactory):
     class Meta(object):
-        model = ApplicationOrganizationFilter
+        model = ApplicationOrganization
 
     application = factory.SubFactory(ApplicationFactory)
     organization = factory.SubFactory(OrganizationFactory)
-    provider_type = ApplicationOrganizationFilter.CONTENT_PROVIDER_TYPE
+    relation_type = ApplicationOrganization.RELATION_TYPE_CONTENT_ORG
 
 
 class AccessTokenFactory(DjangoModelFactory):

@@ -10,6 +10,8 @@ from oauth2_provider.scopes import get_scopes_backend
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import AuthorizationView
 
+from openedx.core.djangoapps.oauth_dispatch.models import ApplicationOrganization
+
 
 # TODO (ARCH-83) remove once we have full support of OAuth Scopes
 class EdxOAuth2AuthorizationView(AuthorizationView):
@@ -44,7 +46,7 @@ class EdxOAuth2AuthorizationView(AuthorizationView):
             # at this point we know an Application instance with such client_id exists in the database
             application = get_application_model().objects.get(client_id=credentials['client_id'])
             kwargs['application'] = application
-            kwargs['organization_list'] = [f.organization.short_name for f in application.org_filters.all()]
+            kwargs['content_orgs'] = application.get_related_orgs(ApplicationOrganization.RELATION_TYPE_CONTENT_ORG)
             kwargs['client_id'] = credentials['client_id']
             kwargs['redirect_uri'] = credentials['redirect_uri']
             kwargs['response_type'] = credentials['response_type']

@@ -84,35 +84,46 @@ class ApplicationAccess(models.Model):
             scopes=self.scopes,
         )
 
+    def get_related_orgs(self, relation_type=None):
+        return [r for r in self.organizations if r is None or r.relation_type == relation_type]
 
-class ApplicationOrganizationFilter(models.Model):
+
+class ApplicationOrganization(models.Model):
     """
-    Associates an organization to a given ScopedApplication including the
-    provider type of the organization so that organization-based filters
-    can be added to access tokens provided to the given Application.
+    Associates a DOT Application to an Organization.
 
     See openedx/core/djangoapps/oauth_dispatch/docs/decisions/0007-include-organizations-in-tokens.rst
     for the intended use of this model.
     """
-    CONTENT_PROVIDER_TYPE = 'content_org'
-    ORGANIZATION_PROVIDER_TYPES = (
-        (CONTENT_PROVIDER_TYPE, _('Content Provider')),
+    RELATION_TYPE_CONTENT_ORG = 'content_org'
+    RELATION_TYPES = (
+        (RELATION_TYPE_CONTENT_ORG, _('Content Provider')),
     )
 
-    application = models.ForeignKey(oauth2_settings.APPLICATION_MODEL, related_name='org_filters')
+    application = models.ForeignKey(oauth2_settings.APPLICATION_MODEL, related_name='organizations')
     organization = models.ForeignKey(Organization)
-    provider_type = models.CharField(
+    relation_type = models.CharField(
         max_length=32,
-        choices=ORGANIZATION_PROVIDER_TYPES,
-        default=CONTENT_PROVIDER_TYPE,
+        choices=RELATION_TYPES,
+        default=RELATION_TYPE_CONTENT_ORG,
     )
 
     class Meta:
         app_label = 'oauth_dispatch'
-        unique_together = ('application', 'organization', 'provider_type')
+        unique_together = ('application', 'organization', 'relation_type')
 
     def __unicode__(self):
         """
         Return a unicode representation of this object.
         """
-        return unicode(':'.join([self.provider_type, self.organization.short_name]))
+        return u"{application_name}:{organization}:{relation_type}".format(
+                application_name=self.application.name,
+                organization=self.organization.short_name,
+                relation_type=self.relation_type,
+            )
+
+    def to_jwt_filter_claim(self):
+        """
+        Serialize for use in JWT filter claim.
+        """
+        return unicode(':'.join([self.relation_type, self.organization.short_name]))
