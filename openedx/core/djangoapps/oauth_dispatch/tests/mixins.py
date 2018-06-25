@@ -13,7 +13,7 @@ from student.models import UserProfile, anonymous_id_for_user
 class AccessTokenMixin(object):
     """ Mixin for tests dealing with OAuth 2 access tokens. """
 
-    def assert_valid_jwt_access_token(self, access_token, user, scopes=None, should_be_expired=False):
+    def assert_valid_jwt_access_token(self, access_token, user, scopes=None, should_be_expired=False, filters=None):
         """
         Verify the specified JWT access token is valid, and belongs to the specified user.
 
@@ -74,6 +74,9 @@ class AccessTokenMixin(object):
                 'family_name': user.last_name,
                 'given_name': user.first_name,
             })
+
+        if filters:
+            expected['filters'] = filters
 
         self.assertDictContainsSubset(expected, payload)
 

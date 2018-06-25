@@ -117,12 +117,12 @@ class _DispatchingViewTestCase(TestCase):
         )
         models.RestrictedApplication.objects.create(application=self.restricted_dot_app)
 
-    def _post_request(self, user, client, token_type=None, scopes=None):
+    def _post_request(self, user, client, token_type=None, scope=None):
         """
         Call the view with a POST request objectwith the appropriate format,
         returning the response object.
         """
-        return self.client.post(self.url, self._post_body(user, client, token_type, scopes))  # pylint: disable=no-member
+        return self.client.post(self.url, self._post_body(user, client, token_type, scope))  # pylint: disable=no-member
 
     def _post_body(self, user, client, token_type=None, scope=None):
         """
@@ -251,12 +251,21 @@ class TestAccessTokenView(AccessTokenLoginMixin, mixins.AccessTokenMixin, _Dispa
         data = json.loads(response.content)
         self.assertNotIn('refresh_token', data)
 
-    def test_jwt_access_token_scopes(self):
+    def test_jwt_access_token_scopes_and_filters(self):
+        """
+        Verify the JWT contains the expected scopes and filters.
+        """
         scopes = self.dot_app_access.scopes
-        response = self._post_request(self.user, self.dot_app, token_type='jwt', scopes=scopes)
+        response = self._post_request(self.user, self.dot_app, token_type='jwt', scope=scopes)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
-        self.assert_valid_jwt_access_token(data['access_token'], self.user, scopes)
+        self.assert_valid_jwt_access_token(
+            data['access_token'],
+            self.user,
+            scopes,
+            filters=[self.dot_app_org.to_jwt_filter_claim()]
+        )
+
 
 @ddt.ddt
 @httpretty.activate
